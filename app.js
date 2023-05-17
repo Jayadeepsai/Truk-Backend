@@ -15,10 +15,12 @@ const home = require('./routes/homeroute')
 const notification =require('./routes/notificationroute')
 const points = require('./routes/pointswithdrawroutes')
 const contact =require('./routes/menuContactUs')
+const admin = require('./routes/admin')
 
 
 //connect to mongodb
 const uri = 'mongodb+srv://Orumpati_1234:9705821087Sai@cluster0.uqgd1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+// const uri = 'mongodb+srv://Deepu:7700@cluster0.5yjfycv.mongodb.net/Trukapp?retryWrites=true&w=majority';
 mongoose.set("strictQuery", false);
  mongoose.connect(uri)
 .then(response =>{
@@ -70,6 +72,7 @@ app.use('/truckinfo',home)
 app.use('/notificationss',notification)
 app.use('/contact',contact)
 app.use('/point',points);
+app.use('/admin',admin);
 app.get("/", (req, res, next)=>{
     res.json({
         name:"hello",

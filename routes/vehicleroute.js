@@ -328,4 +328,22 @@ async function addtrucknotificatio(Bidprice,placebidids,Name){
     
     }
 
+  
+
+
+    //get by id
+
+router.get('/vehicleByIdForAdmin/:id', async (req, res) => {
+    try {
+        const vehicle = await AddVehicle.findOne({ _id: req.params.id })
+        console.log(vehicle)
+        if (!vehicle) {
+            res.status(404).send({ error: "No data found" })
+        }
+        res.status(200).json(vehicle)
+    } catch (error) {
+        res.status(401).json(error)
+    }
+})
+
 module.exports= router
