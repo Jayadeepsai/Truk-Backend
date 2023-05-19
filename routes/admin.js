@@ -113,6 +113,24 @@ router.get('/allUsers', async (req, res) => {
     }
 });
 
+//Users filter for admin
+
+router.get('/usersFilter/:gstVerify', async (req, res) => {
+    try {
+        const users = await userSignup.find({ gstVerify: req.params.gstVerify })
+        if (!users) {
+            res.status(404).send({ error: "Users not found" })
+        }
+        res.status(200).json({
+            TotalUsers: users.length,
+            users
+        })
+    } catch (error) {
+        res.status(401).json({ error })
+        console.log(error)
+    }
+});
+
 //Get loads by status for admin
 
 router.get('/loadsByStatusForAdmin/:isActive', async (req, res) => {
@@ -199,12 +217,12 @@ router.get('/searchByLetterForVehicles/:key', async (req, res) => {
     const data = await vehicle.find(
         {
             "$or": [
-                
+
                 { trukvehiclenumber: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { OriginLocation: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { trukname: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { trukOwnerNumber: { $regex: new RegExp("^" + req.params.key, "i") } },
-                
+
             ]
         }
     )
@@ -213,24 +231,89 @@ router.get('/searchByLetterForVehicles/:key', async (req, res) => {
     })
 });
 
+
+
 router.get('/searchByLetterForActiveLoads/:key', async (req, res) => {
     const data = await quoteGenerate.find(
         {
             "$or": [
-                
+
                 { OriginLocation: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { DestinationLocation: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { LoadId: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { Number: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { expectedPrice: { $regex: new RegExp("^" + req.params.key, "i") } },
-                
+
             ]
         }
     )
+    //     try{    const data = loads.filter(data => {
+    //             return data.isActive == "Active"
+    //         })
+    //         if (data.length) {
+
+    //             res.status(200).json({
+    //                 data,
+    //                 message: "got the matching loads",
+    //                 status: "success"
+    //             })
+    //         } else {
+    //             res.status(200).json({
+    //                 message: "no matching loads found",
+    //                 status: "success"
+    //             })
+
+    //         } }catch (error) {
+    //             res.status(401).json({ error })
+    //             console.log(error)
+    //         }
+    //     }
+    // )
     res.status(200).json({
         data
     })
 });
+
+
+    router.get('/searchByLetterForCompletedLoads/:key', async (req, res) => {
+        const loads = await quoteGenerate.find(
+            {
+                "$or": [
+    
+                    { OriginLocation: { $regex: new RegExp("^" + req.params.key, "i") } },
+                    { DestinationLocation: { $regex: new RegExp("^" + req.params.key, "i") } },
+                    { LoadId: { $regex: new RegExp("^" + req.params.key, "i") } },
+                    { Number: { $regex: new RegExp("^" + req.params.key, "i") } },
+                    { expectedPrice: { $regex: new RegExp("^" + req.params.key, "i") } },
+    
+                ]
+            }
+        )
+            try{    const data = loads.filter(data => {
+                    return data.isActive == "Completed"
+                })
+                if (data.length) {
+    
+                    res.status(200).json({
+                        data,
+                        message: "got the matching loads",
+                        status: "success"
+                    })
+                } else {
+                    res.status(200).json({
+                        message: "no matching loads found",
+                        status: "success"
+                    })
+    
+                } }catch (error) {
+                    res.status(401).json({ error })
+                    console.log(error)
+                }
+            }
+        )
+
+
+
 
 
 
