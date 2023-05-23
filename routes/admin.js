@@ -113,6 +113,22 @@ router.get('/allUsers', async (req, res) => {
     }
 });
 
+//get all type of loads for admin dashboard
+
+router.get('/allPostedLoads', async (req, res) => {
+    try {
+        const loads = await quoteGenerate.find({})
+
+        res.status(200).json({
+            TotalUsers: loads.length,
+            loads
+        })
+    } catch (error) {
+        res.status(401).send(error)
+        console.log(error)
+    }
+});
+
 //Users filter for admin
 
 router.get('/usersFilter/:gstVerify', async (req, res) => {
@@ -234,7 +250,7 @@ router.get('/searchByLetterForVehicles/:key', async (req, res) => {
 
 
 router.get('/searchByLetterForActiveLoads/:key', async (req, res) => {
-    const data = await quoteGenerate.find(
+    const loads = await quoteGenerate.find(
         {
             "$or": [
 
@@ -247,32 +263,33 @@ router.get('/searchByLetterForActiveLoads/:key', async (req, res) => {
             ]
         }
     )
-    //     try{    const data = loads.filter(data => {
-    //             return data.isActive == "Active"
-    //         })
-    //         if (data.length) {
+        try{    const data = loads.filter(data => {
+                return data.isActive == "Active"
+            })
+            if (data.length) {
 
-    //             res.status(200).json({
-    //                 data,
-    //                 message: "got the matching loads",
-    //                 status: "success"
-    //             })
-    //         } else {
-    //             res.status(200).json({
-    //                 message: "no matching loads found",
-    //                 status: "success"
-    //             })
+                res.status(200).json({
+                    data,
+                    message: "got the matching loads",
+                    status: "success"
+                })
+            } else {
+                res.status(200).json({
+                    data,
+                    message: "no matching loads found",
+                    status: "success"
+                })
 
-    //         } }catch (error) {
-    //             res.status(401).json({ error })
-    //             console.log(error)
-    //         }
-    //     }
-    // )
-    res.status(200).json({
-        data
-    })
-});
+            } }catch (error) {
+                res.status(401).json({ error })
+                console.log(error)
+            }
+        }
+    )
+//     res.status(200).json({
+//         data
+//     })
+// });
 
 
     router.get('/searchByLetterForCompletedLoads/:key', async (req, res) => {
@@ -301,6 +318,7 @@ router.get('/searchByLetterForActiveLoads/:key', async (req, res) => {
                     })
                 } else {
                     res.status(200).json({
+                        data,
                         message: "no matching loads found",
                         status: "success"
                     })
