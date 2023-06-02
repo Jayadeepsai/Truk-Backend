@@ -14,6 +14,8 @@ const quoteGenerate = require('../models/generateQuotemodal');
 const vehicle = require("../models/vehicle");
 const userSignup = require("../models/userSignup");
 const adminData = require("../models/adminModel");
+const contact = require("../models/menuContactUs")
+
 
 //Admin signup
 
@@ -81,7 +83,7 @@ router.post('/loginAdmin', async (req, res) => {
                     data: doc
                 })
             } else {
-                res.status(200).json({
+                res.status(201).json({
                     message: "No Matching data found",
                     status: "failed",
 
@@ -120,13 +122,49 @@ router.get('/allPostedLoads', async (req, res) => {
         const loads = await quoteGenerate.find({})
 
         res.status(200).json({
-            TotalUsers: loads.length,
+            TotalLoads: loads.length,
             loads
         })
     } catch (error) {
         res.status(401).send(error)
         console.log(error)
     }
+});
+
+
+//get Queries data
+
+router.get('/allQueries', async (req, res) => {
+    try {
+        const queries = await contact.find({})
+
+        res.status(200).json({
+            TotalQueries: queries.length,
+            queries
+        })
+    } catch (error) {
+        res.status(401).send(error)
+        console.log(error)
+    }
+});
+
+
+router.get('/searchByLetterForQueries/:key', async (req, res) => {
+    const data = await contact.find(
+        {
+            "$or": [
+
+                { Name: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { PhoneNumber: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { Query: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { Loadid: { $regex: new RegExp("^" + req.params.key, "i") } },
+
+            ]
+        }
+    )
+    res.status(200).json({
+        data
+    })
 });
 
 //Users filter for admin
@@ -170,7 +208,7 @@ router.get('/loadsByStatusForAdmin/:isActive', async (req, res) => {
 
 router.get('/allVehiclesForAdmin', async (req, res) => {
     try {
-        const vehicles = await vehicle.find({})
+        const vehicles = await vehicle.find()
 
         res.status(200).json({
             TotalVehicles: vehicles.length,
@@ -220,6 +258,7 @@ router.get('/searchByLetterForUsers/:key', async (req, res) => {
                 { firstName: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { lastName: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { city: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { referalCode: { $regex: new RegExp("^" + req.params.key, "i") } },
             ]
         }
     )
@@ -250,6 +289,50 @@ router.get('/searchByLetterForVehicles/:key', async (req, res) => {
 
 
 router.get('/searchByLetterForActiveLoads/:key', async (req, res) => {
+    const data = await quoteGenerate.find(
+        {
+            "$or": [
+
+                { OriginLocation: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { DestinationLocation: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { LoadId: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { Number: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { expectedPrice: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { isActive: { $regex: new RegExp("^" + req.params.key, "i") } },
+
+            ]
+        }
+    )
+    //     try{    const data = loads.filter(data => {
+    //             return data.isActive == "Active"
+    //         })
+    //         if (data.length) {
+
+    //             res.status(200).json({
+    //                 data,
+    //                 message: "got the matching loads",
+    //                 status: "success"
+    //             })
+    //         } else {
+    //             res.status(200).json({
+    //                 data,
+    //                 message: "no matching loads found",
+    //                 status: "success"
+    //             })
+
+    //         } }catch (error) {
+    //             res.status(401).json({ error })
+    //             console.log(error)
+    //         }
+    //     }
+    // )
+    res.status(200).json({
+        data
+    })
+});
+
+
+router.get('/searchByLetterForCompletedLoads/:key', async (req, res) => {
     const loads = await quoteGenerate.find(
         {
             "$or": [
@@ -263,74 +346,126 @@ router.get('/searchByLetterForActiveLoads/:key', async (req, res) => {
             ]
         }
     )
-        try{    const data = loads.filter(data => {
-                return data.isActive == "Active"
+    try {
+        const data = loads.filter(data => {
+            return data.isActive == "Completed"
+        })
+        if (data.length) {
+
+            res.status(200).json({
+                data,
+                message: "got the matching loads",
+                status: "success"
             })
-            if (data.length) {
+        } else {
+            res.status(200).json({
+                data,
+                message: "no matching loads found",
+                status: "success"
+            })
 
-                res.status(200).json({
-                    data,
-                    message: "got the matching loads",
-                    status: "success"
-                })
-            } else {
-                res.status(200).json({
-                    data,
-                    message: "no matching loads found",
-                    status: "success"
-                })
-
-            } }catch (error) {
-                res.status(401).json({ error })
-                console.log(error)
-            }
         }
-    )
-//     res.status(200).json({
-//         data
-//     })
-// });
+    } catch (error) {
+        res.status(401).json({ error })
+        console.log(error)
+    }
+}
+)
 
 
-    router.get('/searchByLetterForCompletedLoads/:key', async (req, res) => {
-        const loads = await quoteGenerate.find(
-            {
-                "$or": [
-    
-                    { OriginLocation: { $regex: new RegExp("^" + req.params.key, "i") } },
-                    { DestinationLocation: { $regex: new RegExp("^" + req.params.key, "i") } },
-                    { LoadId: { $regex: new RegExp("^" + req.params.key, "i") } },
-                    { Number: { $regex: new RegExp("^" + req.params.key, "i") } },
-                    { expectedPrice: { $regex: new RegExp("^" + req.params.key, "i") } },
-    
-                ]
-            }
-        )
-            try{    const data = loads.filter(data => {
-                    return data.isActive == "Completed"
-                })
-                if (data.length) {
-    
-                    res.status(200).json({
-                        data,
-                        message: "got the matching loads",
-                        status: "success"
-                    })
-                } else {
-                    res.status(200).json({
-                        data,
-                        message: "no matching loads found",
-                        status: "success"
-                    })
-    
-                } }catch (error) {
-                    res.status(401).json({ error })
-                    console.log(error)
-                }
-            }
-        )
+//update Query status
+
+router.put('/query/:id', async (req, res) => {
+    const updates = Object.keys(req.body) //keys will be stored in updates ==> req body fields
+    const allowedUpdates = ['queryStatus'] // updates that are allowed
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update)) // validating the written key in req.body with the allowed updates
+    if (!isValidOperation) {
+        return res.status(400).json({ error: 'invalid updates' })
+    }
+    try { // used to catch errors
+        const product = await contact.findOne({ _id: req.params.id }) //finding the products based on id
+        if (!product) {
+            return res.status(404).json({ message: 'Invalid Product' }) //error status
+        }
+        updates.forEach((update) => product[update] = req.body[update]) //updating the value
+
+        await product.save()
+        res.status(200).json({
+            updatedProduct: product
+        })
+    } catch (error) {
+        res.status(400).json({ error })
+    }
+})
+
+//Filter for cont and role of users
+
+router.get('/usersFilterForShipper/:role', async (req, res) => {
+    try {
+        const users = await userSignup.find({ role: req.params.role })
+        if (!users) {
+            res.status(404).send({ error: "Users not found" })
+        }
+        res.status(200).json({
+            TotalUsers: users.length,
+            users
+        })
+    } catch (error) {
+        res.status(401).json({ error })
+        console.log(error)
+    }
+});
 
 
+//update Query status
+
+router.put('/userWithdrawStatus/:id', async (req, res) => {
+    const updates = Object.keys(req.body) //keys will be stored in updates ==> req body fields
+    const allowedUpdates = ['withdrawStatus'] // updates that are allowed
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update)) // validating the written key in req.body with the allowed updates
+    if (!isValidOperation) {
+        return res.status(400).json({ error: 'invalid updates' })
+    }
+    try { // used to catch errors
+        const product = await userSignup.findOne({ _id: req.params.id }) //finding the products based on id
+        if (!product) {
+            return res.status(404).json({ message: 'Invalid Product' }) //error status
+        }
+        updates.forEach((update) => product[update] = req.body[update]) //updating the value
+
+        await product.save()
+        res.status(200).json({
+            updatedProduct: product
+        })
+    } catch (error) {
+        res.status(400).json({ error })
+    }
+})
+
+router.get('/getuser', async (req, res) => {  //// async makes a function return a Promise
+    try {
+        const user = await adminData.find({})
+        //await makes a function wait for a Promise
+        res.status(200).json({ user })
+    } catch (error) {
+        res.status(400).send(error)
+        console.log(error)
+    }
+})
+
+router.delete('/delete/:id', (req, res) => {
+    adminData.findByIdAndDelete(req.params.id)  //params means parameter value
+        .then(() => res.json('user deleted'))
+        .catch(err => res.status(400).json(`Error: ${err}`));
+
+})
+
+router.put('/update/:id', (req, res) => {
+    adminData.findByIdAndUpdate(req.params.id, req.body)  //params means parameter value
+        .then(() => res.json('user updated'))
+        .catch(err => res.status(400).json(`Error: ${err}`));
+
+})
 
 
 

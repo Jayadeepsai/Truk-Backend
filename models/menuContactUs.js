@@ -22,6 +22,10 @@ const contactUs = mongoose.Schema({
         type: String,
         //required: true
     },
+    queryStatus:{
+        type:String,
+        default:"Pending"
+    }
    
 })
 

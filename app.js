@@ -25,8 +25,8 @@ mongoose.set("strictQuery", false);
  mongoose.connect(uri)
 .then(response =>{
    console.log('mongodb is connected')
-   const add ='Saan,ejhc,jhe,'
-   console.log(add.split(',')[0])
+   const add ='2023-08-12T12:00'
+   console.log(add.split('T')[0])
 })
 .catch(error=>{
    console.log(error)
