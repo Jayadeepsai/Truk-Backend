@@ -8,6 +8,8 @@ const mongoose = require("mongoose");
 const { body } = require('express-validator'); //use express validator for few required things
 
 const nodemailer = require('nodemailer')
+const sdk = require('api')('@onesignal/v9.0#1g2uuailbwvyjvk')
+const OneSignal = require('@onesignal/node-onesignal')
 
 const pointsWithdraw = require('../models/pointswithdraw');
 const quoteGenerate = require('../models/generateQuotemodal');
@@ -15,6 +17,8 @@ const vehicle = require("../models/vehicle");
 const userSignup = require("../models/userSignup");
 const adminData = require("../models/adminModel");
 const contact = require("../models/menuContactUs")
+const adminMessage = require("../models/adminMessage");
+const { restart } = require("nodemon");
 
 
 //Admin signup
@@ -402,7 +406,7 @@ router.put('/query/:id', async (req, res) => {
 
 router.get('/usersFilterForShipper/:role', async (req, res) => {
     try {
-        const users = await userSignup.find({ role: req.params.role })
+        const users = await userSignup.find({ role: { $regex: new RegExp("^" + req.params.role) } })
         if (!users) {
             res.status(404).send({ error: "Users not found" })
         }
@@ -464,6 +468,66 @@ router.put('/update/:id', (req, res) => {
     adminData.findByIdAndUpdate(req.params.id, req.body)  //params means parameter value
         .then(() => res.json('user updated'))
         .catch(err => res.status(400).json(`Error: ${err}`));
+
+})
+
+
+// oneSignal 
+
+router.post('/sendMessages', async (req, res, next) => {
+
+    const externalId = req.body.externalId
+
+    const messageData = new adminMessage({
+        title: req.body.title,
+        description: req.body.description
+    })
+    //8fda6cf4-bdbe-4f2e-a709-24f8990ad307
+    const ONESIGNAL_APP_ID = '8fda6cf4-bdbe-4f2e-a709-24f8990ad307';
+
+    const app_key_provider = {
+        getToken() {
+            //return 'ZjA4ZTMyOGEtOTEzMy00MzQyLTg2MmItYWM3YTExMTM2YzI2';
+            return 'OWE5OTk1MTctMjM1NC00ZTZiLWFhNTgtMmY2MTlkNTY0NWZm'
+        }
+    };
+
+    const configuration = OneSignal.createConfiguration({
+        authMethods: {
+            app_key: {
+                tokenProvider: app_key_provider
+            }
+        }
+    });
+    const client = new OneSignal.DefaultApi(configuration);
+
+    const notification = new OneSignal.Notification();
+    notification.app_id = ONESIGNAL_APP_ID;
+    // notification.included_segments = ['Subscribed Users'];
+    notification.include_external_user_ids = externalId
+    notification.contents = {
+        en: messageData.title,
+        // hi: messageData.description
+
+    };
+    const { id } = await client.createNotification(notification);
+
+    const response = await client.getNotification(ONESIGNAL_APP_ID, id);
+
+    console.log(response)
+    const data = await messageData.save()
+    try {
+        return res.status(201).json({
+            message: "Notification sent successfully",
+            messsageDetails: data,
+            response
+        })
+    } catch (err) {
+        return res.status(500).json({
+            message: "Error sending the message"
+        })
+    }
+
 
 })
 
