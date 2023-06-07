@@ -152,6 +152,20 @@ router.get('/allQueries', async (req, res) => {
     }
 });
 
+router.get('/allNotifications', async (req, res) => {
+    try {
+        const notifications = await adminMessage.find({})
+
+        res.status(200).json({
+            TotalNotifications: notifications.length,
+            notifications
+        })
+    } catch (error) {
+        res.status(401).send(error)
+        console.log(error)
+    }
+});
+
 
 router.get('/searchByLetterForQueries/:key', async (req, res) => {
     const data = await contact.find(
