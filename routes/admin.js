@@ -160,7 +160,7 @@ router.get('/allNotifications', async (req, res) => {
             TotalNotifications: notifications.length,
             notifications
         })
-    } catch (error) {
+    } catch (error) {   
         res.status(401).send(error)
         console.log(error)
     }
