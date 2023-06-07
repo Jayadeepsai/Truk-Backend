@@ -160,7 +160,7 @@ router.get('/allNotifications', async (req, res) => {
             TotalNotifications: notifications.length,
             notifications
         })
-    } catch (error) {   
+    } catch (error) {
         res.status(401).send(error)
         console.log(error)
     }
@@ -519,10 +519,12 @@ router.post('/sendMessages', async (req, res, next) => {
     notification.app_id = ONESIGNAL_APP_ID;
     // notification.included_segments = ['Subscribed Users'];
     notification.include_external_user_ids = externalId
+    console.log(messageData)
+    notification.headings = {
+        en: messageData.title
+    }
     notification.contents = {
-        en: messageData.title,
-        // hi: messageData.description
-
+        en: messageData.description
     };
     const { id } = await client.createNotification(notification);
 

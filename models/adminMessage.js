@@ -6,7 +6,7 @@ const adminMessage = mongoose.Schema({
     title: {
         type: String
     },
-    desription: {
+    description: {
         type: String
     },
     time: {
