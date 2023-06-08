@@ -494,7 +494,8 @@ router.post('/sendMessages', async (req, res, next) => {
 
     const messageData = new adminMessage({
         title: req.body.title,
-        description: req.body.description
+        description: req.body.description,
+        to:req.body.to
     })
     //8fda6cf4-bdbe-4f2e-a709-24f8990ad307
     const ONESIGNAL_APP_ID = '8fda6cf4-bdbe-4f2e-a709-24f8990ad307';

@@ -12,6 +12,9 @@ const adminMessage = mongoose.Schema({
     time: {
         type: Date,
         default: Date.now  // Set the default value to the current date and time
+      },
+      to:{
+        type: String
       }
 
 
