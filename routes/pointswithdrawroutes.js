@@ -10,6 +10,7 @@ const { body } = require('express-validator'); //use express validator for few r
 const nodemailer = require('nodemailer')
 
 const pointsWithdraw = require('../models/pointswithdraw')
+const userSignup = require("../models/userSignup");
 const { DateTime } = require('luxon');
 
 // Get the current date and time
@@ -17,25 +18,25 @@ const now = DateTime.local();
 const formattedDateTime = now.toFormat('yyyy-MM-dd HH:mm:ss');
 
 
-router.post('/pointsPost', async(req, res, next) => {        // want to create product details
+router.post('/pointsPost', async (req, res, next) => {        // want to create product details
     const pointsData = new pointsWithdraw({
         _id: new mongoose.Types.ObjectId,
-        userName:req.body.userName,
-        userNumber:req.body.userNumber,
-        requestedPoints:req.body.requestedPoints,
-        dateOfRequest:formattedDateTime
-       
+        userName: req.body.userName,
+        userNumber: req.body.userNumber,
+        requestedPoints: req.body.requestedPoints,
+        dateOfRequest: formattedDateTime
+
     });
 
 
     try {
         await pointsData.save()
-        
+
 
         res.status(201).json({
             userData: pointsData
         })
-        
+
     } catch (error) {
         console.log(error)
         res.status(401).json(error)
@@ -45,18 +46,18 @@ router.post('/pointsPost', async(req, res, next) => {        // want to create p
 
 
 
-router.post('/emailPoints', (req, res, next)=>{ 
- 
+router.post('/emailPoints', (req, res, next) => {
+
     var transporter = nodemailer.createTransport({
         service: 'gmail',
-//         Outgoing Server Name: smtp.zoho.in
-// Port: 465
-// Security Type: SSL 
-// Require Authentication: Yes
-auth:{
-    user:'info@trukapp.com',
-    pass:'shvncmnxzsoiluat'  
-}
+        //         Outgoing Server Name: smtp.zoho.in
+        // Port: 465
+        // Security Type: SSL 
+        // Require Authentication: Yes
+        auth: {
+            user: 'info@trukapp.com',
+            pass: 'shvncmnxzsoiluat'
+        }
         // host: 'smtppro.zoho.in',
         // secure: 'SSL',
         // port: 465,
@@ -64,59 +65,77 @@ auth:{
         //   user: 'jayadeep.mettela@ro-one.in',
         //   pass: 'pUxdfkTc9iLp',
         // },
-    
+
     })
     var mailOptions = {
-       
+
         from: 'info@trukapp.com',
-         to: 'info@trukapp.com',
-         subject: "Action Needed -Refferal Coins Withdrawal Request",
-         text:req.body.text,
+        to: 'info@trukapp.com',
+        subject: "Action Needed -Refferal Coins Withdrawal Request",
+        text: req.body.text,
         // recipients:req.body.PhoneNumber
     }
     // if( req.body.Name ==''||  req.body.PhoneNumber=='' || req.body.To=='' || req.body.Query){
     //     console.log("Something Went Wrong");
     // }else{
-    transporter.sendMail(mailOptions, function(err, info){
-        if(err){
-           return console.log(err);
+    transporter.sendMail(mailOptions, function (err, info) {
+        if (err) {
+            return console.log(err);
         }
-        else{
-            console.log("Email Sent"+ info.response)
+        else {
+            const data = {
+                withdrawStatus: "Pending"
+            }
+            console.log("Email Sent" + info.response)
+            userSignup.findByIdAndUpdate({ _id: req.body._id }, { $set: data }, { new: true }, (err, result) => {
+
+                if (err) {
+                    console.log(err)
+                    res.status(500).json({
+                        Error: err
+                    })
+                } else {
+                    res.status(201).json({
+                        message: "Updated withdraw status successfully",
+                        updatedStatus: result
+                    })
+                }
+            })
+
         }
     })
     //}
-    });
+});
 
 
-    router.post('/reqestedHistory', (req, res, next) => {
-        pointsWithdraw.find({ userNumber: req.body.userNumber }).select().exec().then(
-            doc => {
-                console.log(doc)
-                //check if it has matching docs then send response
-                if (doc) {
-                    res.status(200).json({
-                        Loads:doc.length,
-                        data: doc,
-                        message: "got the matching history based on the profile",
-                        status: "success"
-                    })
-                } else {
-                    res.status(400).json({
-                        message: "no history found",
-                        status: "no docs"
-                    })
-    
-                }
+router.post('/reqestedHistory', (req, res, next) => {
+    pointsWithdraw.find({ userNumber: req.body.userNumber }).select().exec().then(
+        doc => {
+            console.log(doc)
+            //check if it has matching docs then send response
+            if (doc) {
+                res.status(200).json({
+                    Loads: doc.length,
+                    data: doc,
+                    message: "got the matching history based on the profile",
+                    status: "success"
+                })
+            } else {
+                res.status(400).json({
+                    message: "no history found",
+                    status: "no docs"
+                })
+
             }
-        ).catch(err => {
-            res.status(400).json({
-                message: "failed to get history",
-                status: "failed",
-                error: err
-            })
+        }
+    ).catch(err => {
+        res.status(400).json({
+            message: "failed to get history",
+            status: "failed",
+            error: err
         })
     })
+})
 
 
 module.exports = router;

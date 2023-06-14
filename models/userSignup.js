@@ -124,6 +124,10 @@ PermanetCoins:{
 gstDetails:{
    type:Array,
 
+},
+withdrawStatus:{
+   type:String,
+   default:""
 }
 });
 
