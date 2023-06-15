@@ -434,6 +434,22 @@ router.get('/usersFilterForShipper/:role', async (req, res) => {
     }
 });
 
+router.get('/usersPendingWithDraw/:withdrawStatus', async (req, res) => {
+    try {
+        const users = await userSignup.find({ withdrawStatus: { $regex: new RegExp("^" + req.params.withdrawStatus) } })
+        if (!users) {
+            res.status(404).send({ error: "Users not found" })
+        }
+        res.status(200).json({
+            TotalUsers: users.length,
+            users
+        })
+    } catch (error) {
+        res.status(401).json({ error })
+        console.log(error)
+    }
+});
+
 
 //update Query status
 
