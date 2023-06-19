@@ -317,6 +317,7 @@ router.get('/searchByLetterForActiveLoads/:key', async (req, res) => {
                 { Number: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { expectedPrice: { $regex: new RegExp("^" + req.params.key, "i") } },
                 { isActive: { $regex: new RegExp("^" + req.params.key, "i") } },
+                { UserName: { $regex: new RegExp("^" + req.params.key, "i") } },
 
             ]
         }
